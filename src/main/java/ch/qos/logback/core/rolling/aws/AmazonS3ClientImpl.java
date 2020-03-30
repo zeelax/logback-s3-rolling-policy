@@ -20,8 +20,11 @@ import ch.qos.logback.core.rolling.data.CustomData;
 import ch.qos.logback.core.rolling.shutdown.RollingPolicyShutdownListener;
 import ch.qos.logback.core.rolling.util.IdentifierUtil;
 import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 
@@ -46,7 +49,7 @@ public class AmazonS3ClientImpl implements RollingPolicyShutdownListener {
 
     private final String identifier;
 
-    private AmazonS3Client amazonS3Client;
+    private AmazonS3 s3Client;
     private ExecutorService executor;
 
     public AmazonS3ClientImpl(String awsAccessKey, String awsSecretKey, String s3BucketName, String s3FolderName, boolean prefixTimestamp,
@@ -61,7 +64,7 @@ public class AmazonS3ClientImpl implements RollingPolicyShutdownListener {
         this.prefixIdentifier = prefixIdentifier;
 
         executor = Executors.newFixedThreadPool( 1 );
-        amazonS3Client = null;
+        s3Client = null;
 
         identifier = prefixIdentifier? IdentifierUtil.getIdentifier(): null;
     }
@@ -73,16 +76,18 @@ public class AmazonS3ClientImpl implements RollingPolicyShutdownListener {
 
     public void uploadFileToS3Async(final String filename, final Date date, final boolean overrideTimestampSetting) {
 
-        if (amazonS3Client == null) {
+        if (s3Client == null) {
 
             // If the access and secret key is not specified then try to use other providers
             if (getAwsAccessKey() == null || getAwsAccessKey().trim().isEmpty()) {
 
-                amazonS3Client = new AmazonS3Client();
+                s3Client = AmazonS3ClientBuilder.defaultClient();
             } else {
 
                 AWSCredentials cred = new BasicAWSCredentials( getAwsAccessKey(), getAwsSecretKey() );
-                amazonS3Client = new AmazonS3Client( cred );
+                s3Client = AmazonS3ClientBuilder.standard()
+                        .withCredentials(new AWSStaticCredentialsProvider(cred))
+                        .build();
             }
         }
 
@@ -122,24 +127,16 @@ public class AmazonS3ClientImpl implements RollingPolicyShutdownListener {
         s3ObjectName.append( file.getName() );
 
         //Queue thread to upload
-        Runnable uploader = new Runnable() {
+        Runnable uploader = () -> {
+            try {
+                s3Client.putObject(
+                        new PutObjectRequest(getS3BucketName(), s3ObjectName.toString(), file)
+                                .withCannedAcl(CannedAccessControlList.BucketOwnerFullControl));
+            } catch (Exception ex) {
 
-            @Override
-            public void run() {
-
-                try {
-
-                    amazonS3Client.putObject(
-                            new PutObjectRequest(getS3BucketName(), s3ObjectName.toString(), file)
-                                    .withCannedAcl(CannedAccessControlList.BucketOwnerFullControl));
-                }
-                catch (Exception ex) {
-
-                    ex.printStackTrace();
-                }
+                ex.printStackTrace();
             }
         };
-
         executor.execute( uploader );
     }
 
