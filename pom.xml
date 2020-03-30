@@ -4,38 +4,28 @@
     <!-- PROJECT METADATA -->
     <groupId>ch.qos.logback</groupId>
     <artifactId>logback-s3-rolling-policy</artifactId>
-    <version>GIT-SNAPSHOT</version>
+    <version>0.0.1</version>
+    <packaging>jar</packaging>
 
-    <!-- CODE MANAGEMENT -->
-    <scm>
-        <tag>HEAD</tag>
-        <url>https://git@github.com/link-nv/logback-s3</url>
-        <connection>scm:git:ssh://git@github.com/link-nv/logback-s3</connection>
-        <developerConnection>scm:git:ssh://git@github.com/link-nv/logback-s3</developerConnection>
-    </scm>
-
-    <reporting>
-        <outputDirectory>target/site</outputDirectory>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>${maven-javadoc-plugin.version}</version>
-            </plugin>
-        </plugins>
-    </reporting>
+    <name>logback-s3-rolling-policy</name>
+    <url>https://github.com/komuro-hiraku/logback-s3-rolling-policy</url>
 
     <properties>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <java.version>1.8</java.version>
 
+        <!-- 認証情報 -->
+        <github.global.server>github</github.global.server>
+
+        <!-- Version情報 -->
         <maven-javadoc-plugin.version>2.8.1</maven-javadoc-plugin.version>
         <maven-surefire-report-plugin.version>2.9</maven-surefire-report-plugin.version>
         <maven-clean-plugin.version>2.4.1</maven-clean-plugin.version>
         <maven-resources-plugin.version>2.5</maven-resources-plugin.version>
         <maven-release-plugin.version>2.1</maven-release-plugin.version>
         <maven-install-plugin.version>2.3.1</maven-install-plugin.version>
-        <maven-compiler-plugin.version>2.0.2</maven-compiler-plugin.version>
+        <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
         <maven-surefire-plugin.version>2.9</maven-surefire-plugin.version>
         <maven-surefire-report-plugin.version>2.5</maven-surefire-report-plugin.version>
         <maven-assembly-plugin.version>2.2-beta-5</maven-assembly-plugin.version>
@@ -43,233 +33,70 @@
         <maven-javadoc-plugin.version>2.8.1</maven-javadoc-plugin.version>
         <maven-source-plugin.version>2.0.4</maven-source-plugin.version>
 
-        <aws-java-sdk.version>1.11.293</aws-java-sdk.version>
+        <maven-deploy-plugin.version>2.8.1</maven-deploy-plugin.version>
+
+        <aws-java-sdk.version>1.11.754</aws-java-sdk.version>
         <logback.version>1.2.3</logback.version>
-        <javax-servlet.version>2.4</javax-servlet.version>
-        <google-guava.version>18.0</google-guava.version>
-        <jetbrains-annotations.version>15.0</jetbrains-annotations.version>
+        <javax-servlet.version>4.0.1</javax-servlet.version>
+        <google-guava.version>28.2-jre</google-guava.version>
+        <jetbrains-annotations.version>18.0.0</jetbrains-annotations.version>
 
     </properties>
 
-    <!-- COMPILATION PROFILES -->
-    <profiles>
-
-        <!-- Release profile -->
-        <profile>
-            <id>release</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-javadoc-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>attach-javadocs</id>
-                                <goals>
-                                    <goal>jar</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-source-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>attach-sources</id>
-                                <phase>verify</phase>
-                                <goals>
-                                    <goal>jar</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-
-    </profiles>
+    <distributionManagement>
+        <repository>
+            <id>internal.repos</id>
+            <name>Temporary Staging Repository</name>
+            <url>file://${project.build.directory}/mvn-repo</url>
+        </repository>
+    </distributionManagement>
 
     <build>
-
-        <!-- Suppress MavenModelInspection -->
-        <sourceDirectory>src/main/java</sourceDirectory>
-        <resources>
-            <resource>
-                <directory>src/main/java</directory>
-                <filtering>false</filtering>
-                <excludes>
-                    <exclude>**/*.java</exclude>
-                </excludes>
-            </resource>
-            <resource>
-                <directory>src/main/resources</directory>
-                <filtering>true</filtering>
-            </resource>
-        </resources>
-        <testResources>
-            <testResource>
-                <directory>src/test/resources</directory>
-                <filtering>true</filtering>
-            </testResource>
-        </testResources>
-        <!--suppress MavenModelInspection-->
-        <scriptSourceDirectory>src/main/scripts</scriptSourceDirectory>
-        <directory>target</directory>
-        <outputDirectory>target/classes</outputDirectory>
-        <testOutputDirectory>target/test-classes</testOutputDirectory>
-        <finalName>${project.artifactId}-${project.version}</finalName>
-
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-release-plugin</artifactId>
-                <configuration>
-                    <autoVersionSubmodules>true</autoVersionSubmodules>
-                    <developmentVersion>GIT-SNAPSHOT</developmentVersion>
-                    <localCheckout>true</localCheckout>
-                    <preparationGoals>clean install</preparationGoals>
-                    <goals>install</goals>
-                    <updateBranchVersions>true</updateBranchVersions>
-                    <updateWorkingCopyVersions>false</updateWorkingCopyVersions>
-                    <branchName>${project.version}-maint</branchName>
-                    <mavenExecutorId>forked-path</mavenExecutorId>
-                    <pushChanges>false</pushChanges>
-                    <localCheckout>true</localCheckout>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-resources-plugin</artifactId>
-                <configuration>
-                    <nonFilteredFileExtensions>
-                        <nonFilteredFileExtension>bmp</nonFilteredFileExtension>
-                        <nonFilteredFileExtension>jpg</nonFilteredFileExtension>
-                        <nonFilteredFileExtension>jpeg</nonFilteredFileExtension>
-                        <nonFilteredFileExtension>gif</nonFilteredFileExtension>
-                        <nonFilteredFileExtension>png</nonFilteredFileExtension>
-                        <nonFilteredFileExtension>crt</nonFilteredFileExtension>
-                        <nonFilteredFileExtension>jks</nonFilteredFileExtension>
-                        <nonFilteredFileExtension>xls</nonFilteredFileExtension>
-                        <nonFilteredFileExtension>pdf</nonFilteredFileExtension>
-                    </nonFilteredFileExtensions>
-                </configuration>
-            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <fork>true</fork>
-                    <source>1.7</source>
-                    <target>1.7</target>
-                    <meminitial>32m</meminitial>
-                    <maxmem>128m</maxmem>
-                    <encoding>UTF-8</encoding>
-                    <optimize>true</optimize>
-                    <showWarnings>true</showWarnings>
-                    <showDeprecation>true</showDeprecation>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
                 </configuration>
-                <inherited>true</inherited>
             </plugin>
+
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>${maven-javadoc-plugin.version}</version>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <artifactId>maven-clean-plugin</artifactId>
-                <!--
-                    Don't clean parent directory's target directory: it contains cache
-                    data such as eclipse:eclipse -DdownloadSources=true repository
-                    statuses.
-                -->
-                <inherited>false</inherited>
+                <groupId>com.github.github</groupId>
+                <artifactId>site-maven-plugin</artifactId>
+                <version>0.12</version>
                 <configuration>
-                    <skip>true</skip>
+                    <!-- Git commit message -->
+                    <message>Maven artifacts for ${project.version}</message>
+                    <noJekyll>true</noJekyll>
+
+                    <!-- distributionManagement の url と一致させる -->
+                    <outputDirectory>${project.build.directory}/mvn-repo</outputDirectory>
+                    <branch>refs/heads/mvn-repo</branch>
+                    <includes><include>**/*</include></includes>
+                    <!-- Github リポジトリ名 -->
+                    <repositoryName>logback-s3-rolling-policy</repositoryName>
+                    <repositoryOwner>komuro-hiraku</repositoryOwner>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>site</goal>
+                        </goals>
+                        <phase>deploy</phase>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <version>${maven-deploy-plugin.version}</version>
+                <configuration>
+                    <altDeploymentRepository>internal.repos::default::file://${project.build.directory}/mvn-repo</altDeploymentRepository>
                 </configuration>
             </plugin>
         </plugins>
-
-        <!-- Maven 3.0.3 does not support scp as transport out of the box :| -->
-        <extensions>
-            <extension>
-                <groupId>org.apache.maven.wagon</groupId>
-                <artifactId>wagon-ssh-external</artifactId>
-                <version>1.0</version>
-            </extension>
-            <extension>
-                <groupId>org.kuali.maven.wagons</groupId>
-                <artifactId>maven-s3-wagon</artifactId>
-                <version>1.2.1</version>
-            </extension>
-        </extensions>
-
-        <!-- DEFAULT PLUGIN CONFIGURATION -->
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-clean-plugin</artifactId>
-                    <version>${maven-clean-plugin.version}</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-resources-plugin</artifactId>
-                    <version>${maven-resources-plugin.version}</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-release-plugin</artifactId>
-                    <version>${maven-release-plugin.version}</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-install-plugin</artifactId>
-                    <version>${maven-install-plugin.version}</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-surefire-plugin</artifactId>
-                    <version>${maven-surefire-plugin.version}</version>
-                    <configuration>
-                        <forkMode>always</forkMode>
-                        <useSystemClassLoader>true</useSystemClassLoader>
-                        <childDelegation>false</childDelegation>
-                        <systemProperties>
-                            <property>
-                                <name>java.awt.headless</name>
-                                <value>true</value>
-                            </property>
-                        </systemProperties>
-                    </configuration>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-assembly-plugin</artifactId>
-                    <version>${maven-assembly-plugin.version}</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-dependency-plugin</artifactId>
-                    <version>${maven-dependency-plugin.version}</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-compiler-plugin</artifactId>
-                    <version>${maven-compiler-plugin.version}</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-source-plugin</artifactId>
-                    <version>${maven-source-plugin.version}</version>
-                </plugin>
-            </plugins>
-        </pluginManagement>
-
     </build>
 
     <dependencies>
@@ -294,7 +121,7 @@
 
         <dependency>
             <groupId>javax.servlet</groupId>
-            <artifactId>servlet-api</artifactId>
+            <artifactId>javax.servlet-api</artifactId>
             <version>${javax-servlet.version}</version>
             <scope>provided</scope>
         </dependency>
