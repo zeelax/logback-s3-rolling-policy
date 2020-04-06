@@ -16,109 +16,58 @@
 
 package ch.qos.logback.core.rolling.util;
 
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.net.InetAddress;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.UUID;
+import com.jayway.jsonpath.JsonPath;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+
+import java.io.IOException;
+import java.util.UUID;
 
 public class IdentifierUtil {
+
+    private static String ECS_CONTAINER_META_URI;
+
+    static  {
+        try {
+            ECS_CONTAINER_META_URI = System.getenv("ECS_CONTAINER_METADATA_URI");
+        } catch (Exception e) {
+            ECS_CONTAINER_META_URI = null;
+        }
+    }
 
     @NotNull
     public static String getIdentifier() {
 
         String identifier;
 
-        //
-        // 1. Try AWS EC2 Instance ID
-        //
-
-        identifier = getContentOfWebpage( "http://instance-data/latest/meta-data/instance-id" );
-
-        if (identifier != null) {
-
+        // try get ECS Metadata
+        if (ECS_CONTAINER_META_URI != null) {
+            identifier = getIdentifierFromEcsMetadata(ECS_CONTAINER_META_URI);
             return identifier;
+        } else {
+            // ダメならUUIDで自動生成
+            return UUID.randomUUID().toString();
         }
-
-        //
-        // 2. Try hostname
-        //
-
-        identifier = getHostname();
-
-        if (identifier != null) {
-
-            return identifier;
-        }
-
-        //
-        // 3. When the above 2 methods failed, generate a unique ID
-        //
-
-        return UUID.randomUUID().toString();
     }
 
-    @Nullable
-    public static String getContentOfWebpage(String location) {
-
-        try {
-
-            URL url = new URL( location );
-
-            URLConnection con = url.openConnection();
-            InputStream in = con.getInputStream();
-            String encoding = con.getContentEncoding();
-            encoding = encoding == null? "UTF-8": encoding;
-
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            byte[] buf = new byte[8192];
-            int len = 0;
-
-            while ((len = in.read( buf )) != -1) {
-
-                baos.write( buf, 0, len );
-            }
-
-            String body = new String( baos.toByteArray(), encoding );
-
-            if (body.trim().length() > 0) {
-
-                return body.trim();
-            }
+    /**
+     * Docker ContainerId を Identifierとして返す。もし取得できなかった場合、UUIDでGenerateする
+     * @param uri ECSメタデータ取得のためのURI。環境変数に埋め込まれる
+     * @return アプリケーションログが出力されたコンテナを一意に特定するためのID
+     */
+    private static String getIdentifierFromEcsMetadata(String uri) {
+        OkHttpClient client = new OkHttpClient();
+        Request request = new Request.Builder().url(uri).build();
+        String ecsContainerMetadata;
+        try (Response response = client.newCall(request).execute()) {
+            ecsContainerMetadata = response.body().string();
+            return JsonPath.read(ecsContainerMetadata, "$.DockerId");
+        } catch (IOException e) {
+            // remove snake case
+            return UUID.randomUUID().toString().replaceAll("-", "");
         }
-        catch (Exception e) {
-
-            return null;
-        }
-
-        return null;
     }
 
-    @Nullable
-    public static String getHostname() {
-
-        try {
-
-            String hostname = InetAddress.getLocalHost().getHostAddress();
-
-            if (hostname != null) {
-
-                hostname = hostname.replaceAll( "[^a-zA-Z0-9.]+", "" ).trim();
-            }
-
-            if (hostname != null && hostname.length() > 0) {
-
-                return hostname;
-            }
-        }
-        catch (Exception e) {
-
-            return null;
-        }
-
-        return null;
-    }
 }
