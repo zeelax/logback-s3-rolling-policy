@@ -40,6 +40,8 @@
         <javax-servlet.version>4.0.1</javax-servlet.version>
         <google-guava.version>28.2-jre</google-guava.version>
         <jetbrains-annotations.version>18.0.0</jetbrains-annotations.version>
+        <okhttp.version>3.14.2</okhttp.version>
+        <jsonpath.version>2.4.0</jsonpath.version>
 
     </properties>
 
@@ -109,6 +111,18 @@
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>${google-guava.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+            <version>${okhttp.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.jayway.jsonpath</groupId>
+            <artifactId>json-path</artifactId>
+            <version>${jsonpath.version}</version>
         </dependency>
 
         <dependency>
