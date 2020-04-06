@@ -53,9 +53,9 @@ public class IdentifierUtil {
     }
 
     /**
-     * Docker ContainerId を Identifierとして返す。もし取得できなかった場合、UUIDでGenerateする
-     * @param uri ECSメタデータ取得のためのURI。環境変数に埋め込まれる
-     * @return アプリケーションログが出力されたコンテナを一意に特定するためのID
+     * Return Identifier with ECS Docker ContainerId. If can't get, Generate UUID
+     * @param uri for ECS Metadata URI
+     * @return Identifier which container's application log
      */
     private static String getIdentifierFromEcsMetadata(String uri) {
         OkHttpClient client = new OkHttpClient();
