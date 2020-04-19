@@ -8,7 +8,7 @@
     <packaging>jar</packaging>
 
     <name>logback-s3-rolling-policy</name>
-    <url>https://github.com/komuro-hiraku/logback-s3-rolling-policy</url>
+    <url>https://github.com/prismatix-jp/logback-s3-rolling-policy</url>
 
     <properties>
 
@@ -79,7 +79,7 @@
                     <includes><include>**/*</include></includes>
                     <!-- Github リポジトリ名 -->
                     <repositoryName>logback-s3-rolling-policy</repositoryName>
-                    <repositoryOwner>komuro-hiraku</repositoryOwner>
+                    <repositoryOwner>prismatix-jp</repositoryOwner>
                 </configuration>
                 <executions>
                     <execution>
