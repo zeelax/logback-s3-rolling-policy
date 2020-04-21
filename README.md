@@ -24,7 +24,7 @@ Index
 Requirements
 ------------
 
-* Java 1.7+
+* Java 1.8+
 
 Configuration
 -------------
@@ -45,14 +45,29 @@ Whether you implement one of any available S3 policies, the following extra vari
 * `prefixTimestamp` Whether to prefix the uploaded filename with a timestamp formatted as `yyyyMMdd_HHmmss` or not. Boolean value, defaults to `false`.
 * `prefixIdentifier` Whether to prefix the uploaded filename with an identifier or not. Boolean value, defaults to `false`. If running on an AWS EC2 instance, the instance ID will be used. If not running on an AWS EC2 instance, the hostname address will be used. If the hostname address can't be used, a UUID will be used. 
 
-### web.xml
+### Registration Bean and ServletComponentScan
 
-If you're using the shutdown hook `SERVLET_CONTEXT` as defined above, you'll need to add the context listener class to your `web.xml`:
+If you're using the shutdown hook `SERVLET_CONTEXT` as defined above, you'll need to registration bean for the context listener and Add ServletComponentScan Annotation
 
-```xml
-<listener>
-   <listener-class>ch.qos.logback.core.rolling.shutdown.RollingPolicyContextListener</listener-class>
-</listener>
+```java
+@Bean
+public ServletListenerRegistrationBean<RollingPolicyContextListener> sessionListenerWithMetrics() {
+   ServletListenerRegistrationBean<RollingPolicyContextListener> listenerRegBean =
+     new ServletListenerRegistrationBean<>();
+    
+   listenerRegBean.setListener(new RollingPolicyContextListener());
+   return listenerRegBean;
+}
+```
+
+Add `@ServletComponentScan`
+
+```java
+@ServletComponentScan
+@SpringBootApplication
+public class SampleApplication {
+    // ...
+}
 ```
 
 ### Run-time variables
