@@ -50,7 +50,7 @@ Whether you implement one of any available S3 policies, the following extra vari
   * `SERVLET_CONTEXT` This will register a shutdown hook to the context destroyed method of `RollingPolicyContextListener`. Don't forget to actually add the context listener to you `web.xml`. (see below)
 * `rolloverOnExit` Whether to rollover when your application is being shut down or not. Boolean value, defaults to `false`. If this is set to `false`, and you have defined a `shutdownHookType`, then the log file will be uploaded as is.
 * `prefixTimestamp` Whether to prefix the uploaded filename with a timestamp formatted as `yyyyMMdd_HHmmss` or not. Boolean value, defaults to `false`.
-* `prefixIdentifier` Whether to prefix the uploaded filename with an identifier or not. Boolean value, defaults to `false`. If running on an Amazon ECS, the container ID will be used. If not running on an AWS ECS, a UUID will be used.
+* `prefixIdentifier` Whether to prefix the uploaded filename with an identifier or not. Boolean value, defaults to `false`. If running on an Amazon ECS, the container ID will be used. If not running on an Amazon ECS, a UUID will be used.
 
 ### Registration Bean and ServletComponentScan
 
