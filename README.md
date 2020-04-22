@@ -4,10 +4,15 @@ Logback RollingPolicy with S3 upload
 logback-s3-rolling-policy automatically uploads rolled log files to S3.
 
 There are 2 rolling policies which can be used:
+
 * `S3FixedWindowRollingPolicy`
 * `S3TimeBasedRollingPolicy`
 
-logback-s3-rolling-policy was forked from logback-s3 (https://github.com/shuwada/logback-s3) but transfered into a new project because changes were getting too big.
+logback-s3-rolling-policy was forked from [link-nv/logback-s3-rolling-policy](https://github.com/link-nv/logback-s3-rolling-policy).
+Changes are follows.
+
+* Added support for using with Amazon ECS. Not using EC2 Metadata and hostname.
+* Update library version.
 
 Index
 -----
@@ -25,6 +30,8 @@ Requirements
 ------------
 
 * Java 1.8+
+* (recommend)Amazon ECS
+  * If not using Amazon ECS, `prefixIdentifier` is used UUID random string.
 
 Configuration
 -------------
