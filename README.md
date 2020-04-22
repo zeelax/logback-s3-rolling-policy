@@ -18,7 +18,7 @@ Index
 -----
 
 * [Requirements](#requirements) 
-* [Usage](#usage) 
+* [Setup Dependency](#setup-dependency) 
 * [Configuration](#configuration) 
   * [logback.xml variables](#logbackxml-variables) 
   * [Registration Bean and ServletComponentScan](#registration-bean-and-servletcomponentscan) 
@@ -32,6 +32,23 @@ Requirements
 * Java 1.8+
 * (recommend)Amazon ECS
   * If not using Amazon ECS, `prefixIdentifier` is used UUID random string.
+
+Setup Dependency
+------------
+
+configuration `build.gradle`
+
+```groovy
+repositories {
+	// for logback-s3-rolling-policy
+	maven { url "https://raw.github.com/prismatix-jp/logback-s3-rolling-policy/mvn-repo"}
+}
+
+// dependency
+dependencies {
+    compile "ch.qos.logback:logback-s3-rolling-policy:0.0.3"
+}
+```
 
 Configuration
 -------------
