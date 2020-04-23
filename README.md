@@ -46,7 +46,7 @@ repositories {
 
 // dependency
 dependencies {
-    compile "ch.qos.logback:logback-s3-rolling-policy:0.0.3"
+    implementation "ch.qos.logback:logback-s3-rolling-policy:0.0.3"
 }
 ```
 
