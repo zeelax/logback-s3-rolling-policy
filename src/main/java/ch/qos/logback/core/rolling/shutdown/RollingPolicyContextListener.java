@@ -20,7 +20,9 @@ import com.google.common.collect.Lists;
 import java.util.List;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
+import javax.servlet.annotation.WebListener;
 
+@WebListener
 public class RollingPolicyContextListener implements ServletContextListener {
 
     private static final List<RollingPolicyShutdownListener> listeners;

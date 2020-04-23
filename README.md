@@ -4,19 +4,24 @@ Logback RollingPolicy with S3 upload
 logback-s3-rolling-policy automatically uploads rolled log files to S3.
 
 There are 2 rolling policies which can be used:
+
 * `S3FixedWindowRollingPolicy`
 * `S3TimeBasedRollingPolicy`
 
-logback-s3-rolling-policy was forked from logback-s3 (https://github.com/shuwada/logback-s3) but transfered into a new project because changes were getting too big.
+logback-s3-rolling-policy was forked from [link-nv/logback-s3-rolling-policy](https://github.com/link-nv/logback-s3-rolling-policy).
+Changes are follows.
+
+* Added support for using with Amazon ECS. Not using EC2 Metadata and hostname.
+* Update library version.
 
 Index
 -----
 
 * [Requirements](#requirements) 
-* [Usage](#usage) 
+* [Setup Dependency](#setup-dependency) 
 * [Configuration](#configuration) 
   * [logback.xml variables](#logbackxml-variables) 
-  * [web.xml](#webxml) 
+  * [Registration Bean and ServletComponentScan](#registration-bean-and-servletcomponentscan) 
   * [logback.xml rolling policy examples](#logbackxml-rolling-policy-examples) 
 * [AWS Credentials](#aws-credentials) 
 * [Libraries](#libraries) 
@@ -24,7 +29,26 @@ Index
 Requirements
 ------------
 
-* Java 1.7+
+* Java 1.8+
+* (recommend)Amazon ECS
+  * If not using Amazon ECS, `prefixIdentifier` is used UUID random string.
+
+Setup Dependency
+------------
+
+configuration `build.gradle`
+
+```groovy
+repositories {
+	// for logback-s3-rolling-policy
+	maven { url "https://raw.github.com/prismatix-jp/logback-s3-rolling-policy/mvn-repo"}
+}
+
+// dependency
+dependencies {
+    implementation "ch.qos.logback:logback-s3-rolling-policy:0.0.3"
+}
+```
 
 Configuration
 -------------
@@ -43,16 +67,31 @@ Whether you implement one of any available S3 policies, the following extra vari
   * `SERVLET_CONTEXT` This will register a shutdown hook to the context destroyed method of `RollingPolicyContextListener`. Don't forget to actually add the context listener to you `web.xml`. (see below)
 * `rolloverOnExit` Whether to rollover when your application is being shut down or not. Boolean value, defaults to `false`. If this is set to `false`, and you have defined a `shutdownHookType`, then the log file will be uploaded as is.
 * `prefixTimestamp` Whether to prefix the uploaded filename with a timestamp formatted as `yyyyMMdd_HHmmss` or not. Boolean value, defaults to `false`.
-* `prefixIdentifier` Whether to prefix the uploaded filename with an identifier or not. Boolean value, defaults to `false`. If running on an AWS EC2 instance, the instance ID will be used. If not running on an AWS EC2 instance, the hostname address will be used. If the hostname address can't be used, a UUID will be used. 
+* `prefixIdentifier` Whether to prefix the uploaded filename with an identifier or not. Boolean value, defaults to `false`. If running on an Amazon ECS, the container ID will be used. If not running on an Amazon ECS, a UUID will be used.
 
-### web.xml
+### Registration Bean and ServletComponentScan
 
-If you're using the shutdown hook `SERVLET_CONTEXT` as defined above, you'll need to add the context listener class to your `web.xml`:
+If you're using the shutdown hook `SERVLET_CONTEXT` as defined above, you'll need to registration bean for the context listener and Add ServletComponentScan Annotation
 
-```xml
-<listener>
-   <listener-class>ch.qos.logback.core.rolling.shutdown.RollingPolicyContextListener</listener-class>
-</listener>
+```java
+@Bean
+public ServletListenerRegistrationBean<RollingPolicyContextListener> sessionListenerWithMetrics() {
+   ServletListenerRegistrationBean<RollingPolicyContextListener> listenerRegBean =
+     new ServletListenerRegistrationBean<>();
+    
+   listenerRegBean.setListener(new RollingPolicyContextListener());
+   return listenerRegBean;
+}
+```
+
+Add `@ServletComponentScan`
+
+```java
+@ServletComponentScan
+@SpringBootApplication
+public class SampleApplication {
+    // ...
+}
 ```
 
 ### Run-time variables
@@ -144,8 +183,10 @@ Libraries
 ---------
 
 This project uses the following libraries:
-* `com.amazonaws:aws-java-sdk:1.11.7`
+* `com.amazonaws:aws-java-sdk:1.11.754`
 * `ch.qos.logback:logback-classic:1.2.3`
-* `com.google.guava:guava:18.0`
-* `javax.servlet:servlet-api:2.4` (scope provided)
-* `org.jetbrains:annotations:15.0` (scope provided)
+* `com.google.guava:guava:28.2-jre`
+* `javax.servlet:javax.servlet-api:4.0.1` (scope provided)
+* `org.jetbrains:annotations:18.0.0` (scope provided)
+* `com.squareup.okhttp3:okhttp:3.14.2`
+* `com.jayway.jsonpath:json-path:2.4.0`
