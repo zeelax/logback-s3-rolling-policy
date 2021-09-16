@@ -4,7 +4,7 @@
     <!-- PROJECT METADATA -->
     <groupId>ch.qos.logback</groupId>
     <artifactId>logback-s3-rolling-policy</artifactId>
-    <version>0.0.3</version>
+    <version>0.0.4</version>
     <packaging>jar</packaging>
 
     <name>logback-s3-rolling-policy</name>
@@ -38,7 +38,7 @@
         <aws-java-sdk.version>1.11.754</aws-java-sdk.version>
         <logback.version>1.2.3</logback.version>
         <javax-servlet.version>4.0.1</javax-servlet.version>
-        <google-guava.version>28.2-jre</google-guava.version>
+        <google-guava.version>29.0-jre</google-guava.version>
         <jetbrains-annotations.version>18.0.0</jetbrains-annotations.version>
         <okhttp.version>3.14.2</okhttp.version>
         <jsonpath.version>2.4.0</jsonpath.version>
@@ -97,7 +97,7 @@
 
         <dependency>
             <groupId>com.amazonaws</groupId>
-            <artifactId>aws-java-sdk</artifactId>
+            <artifactId>aws-java-sdk-s3</artifactId>
             <version>${aws-java-sdk.version}</version>
         </dependency>
 
